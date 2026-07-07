@@ -79,7 +79,7 @@ async def command_start_handler(message: Message) -> None:
                 caption=(
                     f"Har bir xaridingizdan 1% keshbek olish uchun yuqoridagi kodni taqdim eting.\n"
                     f"💰 {datetime.now().strftime('%d.%m.%Y %H:%M')} holatiga ko'ra balansingiz: "
-                    f"{existing_user.cashback_balance}\n"
+                    f"{existing_user.cashback_balance} so'm\n"
                     f"💳 Karta raqami: {existing_user.barcode}"
                 ),
                 reply_markup=balance_keyboard() if not existing_user.is_admin else admin_menu_keyboard()
@@ -125,7 +125,7 @@ async def contact_handler(message: Message) -> None:
             caption=(
                 f"Ro'yxatdan o'tdingiz! Har bir xaridingizdan 1% keshbek olish uchun yuqoridagi kodni taqdim eting.\n"
                 f"💰 {datetime.now().strftime('%d.%m.%Y %H:%M')} holatiga ko'ra balansingiz: "
-                f"{new_user.cashback_balance}\n"
+                f"{new_user.cashback_balance}\n so'm"
                 f"💳 Karta raqami: {new_user.barcode}"
             ),
             reply_markup=balance_keyboard(),
@@ -160,7 +160,7 @@ async def balance_handler(message: Message):
             caption=(
                 "Har bir xaridingizdan 1% keshbek olish uchun yuqoridagi kodni taqdim eting.\n\n"
                 f"💰 {datetime.now().strftime('%d.%m.%Y %H:%M')} holatiga ko'ra balansingiz: "
-                f"{user.cashback_balance}\n"
+                f"{user.cashback_balance} so'm\n"
                 f"💳 Karta raqami: {user.barcode}"
             ),
             reply_markup=balance_keyboard() if not user.is_admin else admin_menu_keyboard()
@@ -299,9 +299,9 @@ async def get_amount(message: Message, state: FSMContext):
     await message.answer(
         f"✅ Xarid qo'shildi\n\n"
         f"👤 {customer_phone}\n"
-        f"💵 Xarid summasi: {amount:,.0f}\n"
-        f"💰 Shundan keshbek: {cashback:,.2f}"
-        f"💵💵💵 Umumiy keshbek: {customer_balance:,.2f}",
+        f"💵 Xarid summasi: {amount:,.0f} so'm\n"
+        f"💰 Shundan keshbek: {cashback:,.2f} so'm"
+        f"💵💵💵 Umumiy keshbek: {customer_balance:,.2f} so'm",
         reply_markup=admin_menu_keyboard()
     )
 
