@@ -70,7 +70,7 @@ async def command_start_handler(message: Message) -> None:
         existing_user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
 
         if existing_user:
-            path_photo = f"barcodes/{existing_user.barcode}.png"
+            path_photo = path.join(BARCODE_DIR, f"{existing_user.barcode}.png")
             # welcome them back — maybe remind them of their barcode
             if not path.exists(path_photo):
                 img = generate_barcode_image(existing_user.barcode)
@@ -117,7 +117,8 @@ async def contact_handler(message: Message) -> None:
             return
         
         img = generate_barcode_image(new_user.barcode)
-        with open(f"barcodes/{new_user.barcode}.png", "wb") as f:
+        file_path = path.join(BARCODE_DIR, f"{new_user.barcode}.png")
+        with open(file_path, "wb") as f:
             f.write(img.getvalue())
         photo = FSInputFile(f"barcodes/{new_user.barcode}.png")
         # keep this reply inside the `with` block — reading new_user.barcode
