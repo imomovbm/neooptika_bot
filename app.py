@@ -323,8 +323,3 @@ bot = Bot(
         parse_mode=ParseMode.HTML
     )
 )
-
-
-async def on_shutdown(app):
-    await bot.delete_webhook()
-    await bot.session.close()
