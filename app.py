@@ -1,7 +1,4 @@
 import re
-import asyncio
-import logging
-import sys
 from dotenv import load_dotenv
 from os import getenv, path
 
@@ -9,8 +6,7 @@ BASE_DIR = path.dirname(path.abspath(__file__))
 load_dotenv(path.join(BASE_DIR, ".env"))
 BARCODE_DIR = path.join(BASE_DIR, "barcodes")
 
-
-from aiogram import Bot, Dispatcher, html, F
+from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
@@ -26,8 +22,8 @@ from sqlalchemy.exc import IntegrityError
 
 # Bot token can be obtained via https://t.me/BotFather
 TOKEN = getenv("BOT_TOKEN")
-WEBHOOK_PATH = "/webhook"
-WEBHOOK_URL = "https://neooptika.uz/bot/webhook"
+WEBHOOK_PATH = getenv("WEBHOOK_PATH")
+WEBHOOK_URL = getenv("WEBHOOK_URL")
 # All handlers should be attached to the Router (or Dispatcher)
 
 dp = Dispatcher()
@@ -120,7 +116,7 @@ async def contact_handler(message: Message) -> None:
         file_path = path.join(BARCODE_DIR, f"{new_user.barcode}.png")
         with open(file_path, "wb") as f:
             f.write(img.getvalue())
-        photo = FSInputFile(f"barcodes/{new_user.barcode}.png")
+        photo = FSInputFile(file_path)
         # keep this reply inside the `with` block — reading new_user.barcode
         # after the session closes can throw an error
 
