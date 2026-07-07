@@ -9,9 +9,6 @@ BASE_DIR = path.dirname(path.abspath(__file__))
 load_dotenv(path.join(BASE_DIR, ".env"))
 BARCODE_DIR = path.join(BASE_DIR, "barcodes")
 
-from aiohttp import web
-from aiogram.types import Update
-from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 from aiogram import Bot, Dispatcher, html, F
 from aiogram.client.default import DefaultBotProperties
@@ -328,45 +325,6 @@ bot = Bot(
 )
 
 
-async def on_startup(app):
-    await bot.set_webhook(
-        WEBHOOK_URL
-    )
-    logging.info("Webhook installed")
-
-
 async def on_shutdown(app):
     await bot.delete_webhook()
     await bot.session.close()
-
-
-app = web.Application()
-
-
-SimpleRequestHandler(
-    dispatcher=dp,
-    bot=bot,
-).register(
-    app,
-    path=WEBHOOK_PATH
-)
-
-
-setup_application(
-    app,
-    dp,
-    bot=bot
-)
-
-
-app.on_startup.append(on_startup)
-app.on_shutdown.append(on_shutdown)
-
-async def health(request):
-    return web.Response(text="Bot is running")
-
-
-app.router.add_get("/", health)
-
-# IMPORTANT FOR CPANEL PASSENGER
-application = app

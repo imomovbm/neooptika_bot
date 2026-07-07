@@ -4,3 +4,6 @@ python-dotenv
 aiohttp
 pillow
 python-barcode
+fastapi
+uvicorn
+flask
