@@ -241,7 +241,8 @@ async def get_customer(message: Message, state: FSMContext):
     await state.set_state(PurchaseStates.waiting_for_amount)
 
     await message.answer(
-        "Summani kiriting:",
+        f"Foydalanuvchi mavjud keshbek miqdori: {user.cashback_balance} so'm"
+        f"Summani kiriting:",
         reply_markup=cancel_keyboard()
     )
 
