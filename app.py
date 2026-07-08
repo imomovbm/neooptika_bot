@@ -13,7 +13,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, FSInputFile
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
-from models import User, SessionLocal, Transaction
+from models import User, SessionLocal, Transaction, SQLiteStorage
 from barcode_making import generate_barcode_image
 from datetime import datetime
 
@@ -26,7 +26,10 @@ WEBHOOK_PATH = getenv("WEBHOOK_PATH")
 WEBHOOK_URL = getenv("WEBHOOK_URL")
 # All handlers should be attached to the Router (or Dispatcher)
 
-dp = Dispatcher()
+# Persist FSM state to store.db instead of process memory, so a Passenger
+# worker restart (idle recycle, deploy, etc.) doesn't wipe an in-progress
+# admin purchase flow.
+dp = Dispatcher(storage=SQLiteStorage())
 
 def contact_keyboard():
     button = KeyboardButton(text="Telefon raqamni ulashish", request_contact=True)
@@ -53,9 +56,7 @@ def admin_menu_keyboard():
 
 def cancel_keyboard():
     return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="❌ Bekor qilish")]
-        ],
+        keyboard=[[KeyboardButton(text="❌ Bekor qilish")]],
         resize_keyboard=True
     )
 
@@ -125,7 +126,7 @@ async def contact_handler(message: Message) -> None:
             caption=(
                 f"Ro'yxatdan o'tdingiz! Har bir xaridingizdan 1% keshbek olish uchun yuqoridagi kodni taqdim eting.\n"
                 f"💰 {datetime.now().strftime('%d.%m.%Y %H:%M')} holatiga ko'ra balansingiz: "
-                f"{new_user.cashback_balance}\n so'm"
+                f"{new_user.cashback_balance} so'm\n"
                 f"💳 Karta raqami: {new_user.barcode}"
             ),
             reply_markup=balance_keyboard(),
@@ -216,7 +217,11 @@ async def admin_handler(message: Message, state: FSMContext):
 
 @dp.message(PurchaseStates.waiting_for_customer)
 async def get_customer(message: Message, state: FSMContext):
-
+    if not message.text:
+        await message.answer(
+            "Xato format!",
+        )
+        return        
     phone = re.sub(r"\D", "", message.text)
 
     if not phone.startswith("998"):
@@ -246,7 +251,11 @@ async def get_customer(message: Message, state: FSMContext):
 
 @dp.message(PurchaseStates.waiting_for_amount)
 async def get_amount(message: Message, state: FSMContext):
-
+    if not message.text:
+        await message.answer(
+            "Xato format!",
+        )
+        return   
     try:
         amount = float(message.text.strip())
         cashback = round(amount * 0.01,2)
@@ -270,6 +279,11 @@ async def get_amount(message: Message, state: FSMContext):
             await state.clear()
             return
 
+        customer = session.query(User).filter_by(id=user_id).first()
+        if customer is None:
+            await message.answer("Foydalanuvchi topilmadi.")
+            return
+
         new_transaction = Transaction(
             user_id=user_id,
             purchase_amount=amount,
@@ -279,17 +293,20 @@ async def get_amount(message: Message, state: FSMContext):
         try:
             session.add(new_transaction)
 
-            customer = session.query(User).filter_by(id=user_id).first()
-            if customer is None:
-                await message.answer("Foydalanuvchi topilmadi.")
-                return
-            
-            customer.cashback_balance += new_transaction.cashback_earned
-            
+            # Atomic UPDATE ... SET balance = balance + x, evaluated by SQLite
+            # against the current on-disk value. Two admins crediting the same
+            # customer at the same moment can no longer stomp on each other —
+            # the old `customer.cashback_balance += cashback` pattern read the
+            # balance into Python first, so the second commit could silently
+            # overwrite the first (lost update).
+            session.query(User).filter_by(id=user_id).update(
+                {User.cashback_balance: User.cashback_balance + cashback}
+            )
+            session.commit()
+
+            session.refresh(customer)
             customer_phone = customer.phone_number
             customer_balance = customer.cashback_balance
-            
-            session.commit()
         except IntegrityError:
             session.rollback()
             await message.answer("Xatolik!")
