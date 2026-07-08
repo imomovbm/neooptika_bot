@@ -100,7 +100,7 @@ async def contact_handler(message: Message) -> None:
     with SessionLocal() as session:
         new_user = User(
             telegram_id=message.from_user.id,   # message.from_user.id
-            phone_number=message.contact.phone_number,  # message.contact.phone_number
+            phone_number=message.contact.phone_number.replace('+',''),  # message.contact.phone_number
             barcode=str(message.from_user.id),       # your generation logic — str(message.from_user.id) is a fine start
         )
 
@@ -219,10 +219,8 @@ async def get_customer(message: Message, state: FSMContext):
 
     phone = re.sub(r"\D", "", message.text)
 
-    if phone.startswith("998"):
-        phone = "+" + phone
-    else:
-        phone = "+998" + phone
+    if not phone.startswith("998"):
+        phone = "998" + phone
 
     with SessionLocal() as session:
         user = session.query(User).filter_by(
@@ -241,7 +239,7 @@ async def get_customer(message: Message, state: FSMContext):
     await state.set_state(PurchaseStates.waiting_for_amount)
 
     await message.answer(
-        f"Foydalanuvchi mavjud keshbek miqdori: {user.cashback_balance} so'm"
+        f"Foydalanuvchi mavjud keshbek miqdori: {user.cashback_balance} so'm\n"
         f"Summani kiriting:",
         reply_markup=cancel_keyboard()
     )
@@ -301,7 +299,7 @@ async def get_amount(message: Message, state: FSMContext):
         f"✅ Xarid qo'shildi\n\n"
         f"👤 {customer_phone}\n"
         f"💵 Xarid summasi: {amount:,.0f} so'm\n"
-        f"💰 Shundan keshbek: {cashback:,.2f} so'm"
+        f"💰 Shundan keshbek: {cashback:,.2f} so'm\n"
         f"💵💵💵 Umumiy keshbek: {customer_balance:,.2f} so'm",
         reply_markup=admin_menu_keyboard()
     )

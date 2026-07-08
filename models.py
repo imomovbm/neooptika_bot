@@ -3,10 +3,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, func, ForeignKey
 from datetime import datetime
+from sqlalchemy.orm import scoped_session
 
 engine = create_engine("sqlite:///store.db", echo=False)  # echo=True prints SQL, great for learning
 SessionLocal = sessionmaker(bind=engine)
-
+Session = scoped_session(SessionLocal)
+                         
 class Base(DeclarativeBase):
     pass
 

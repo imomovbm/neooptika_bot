@@ -7,3 +7,4 @@ python-barcode
 fastapi
 uvicorn
 flask
+flask-admin
