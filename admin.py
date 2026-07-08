@@ -2,7 +2,7 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask import session, redirect, url_for
 
-from models import Session, User, Transaction
+from models import Session, User, Transaction, FSMRecord
 
 class AdminModelView(ModelView):
     def is_accessible(self):
@@ -17,3 +17,4 @@ def init_admin(app):
     admin.init_app(app)
     admin.add_view(AdminModelView(User, Session))
     admin.add_view(AdminModelView(Transaction, Session))
+    admin.add_view(AdminModelView(FSMRecord, Session))
