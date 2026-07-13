@@ -257,7 +257,7 @@ async def get_amount(message: Message, state: FSMContext):
         return   
     try:
         amount = float(message.text.strip())
-        cashback = round(amount * 0.01,2)
+        cashback = round(amount * 0.03,2)
         
         if amount <= 0:
             raise ValueError
