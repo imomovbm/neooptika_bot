@@ -17,7 +17,6 @@ from models import User, SessionLocal, Transaction, SQLiteStorage
 from barcode_making import generate_barcode_image
 from datetime import datetime
 
-
 from sqlalchemy.exc import IntegrityError
 
 # Bot token can be obtained via https://t.me/BotFather
@@ -78,7 +77,7 @@ async def command_start_handler(message: Message) -> None:
             await message.answer_photo(
                 photo,
                 caption=(
-                    f"Har bir xaridingizdan 1% keshbek olish uchun yuqoridagi kodni taqdim eting.\n"
+                    f"Har bir xaridingizdan 3% keshbek olish uchun yuqoridagi kodni taqdim eting.\n"
                     f"💰 {datetime.now().strftime('%d.%m.%Y %H:%M')} holatiga ko'ra balansingiz: "
                     f"{existing_user.cashback_balance} so'm\n"
                     f"💳 Karta raqami: {existing_user.barcode}"
@@ -124,7 +123,7 @@ async def contact_handler(message: Message) -> None:
         await message.answer_photo(
             photo,
             caption=(
-                f"Ro'yxatdan o'tdingiz! Har bir xaridingizdan 1% keshbek olish uchun yuqoridagi kodni taqdim eting.\n"
+                f"Ro'yxatdan o'tdingiz! Har bir xaridingizdan 3% keshbek olish uchun yuqoridagi kodni taqdim eting.\n"
                 f"💰 {datetime.now().strftime('%d.%m.%Y %H:%M')} holatiga ko'ra balansingiz: "
                 f"{new_user.cashback_balance} so'm\n"
                 f"💳 Karta raqami: {new_user.barcode}"
@@ -159,7 +158,7 @@ async def balance_handler(message: Message):
         await message.answer_photo(
             photo,
             caption=(
-                "Har bir xaridingizdan 1% keshbek olish uchun yuqoridagi kodni taqdim eting.\n\n"
+                "Har bir xaridingizdan 3% keshbek olish uchun yuqoridagi kodni taqdim eting.\n\n"
                 f"💰 {datetime.now().strftime('%d.%m.%Y %H:%M')} holatiga ko'ra balansingiz: "
                 f"{user.cashback_balance} so'm\n"
                 f"💳 Karta raqami: {user.barcode}"
